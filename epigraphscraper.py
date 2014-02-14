@@ -13,24 +13,25 @@ from os.path import isfile, join         #also used in grabbing all files in dir
 import os                                
 import csv                               #used to interact with csv files (not yet working)
 import MySQLdb                           #used to interact with MySQL Database
+import re                                #handle escape characters for MySQL 
 totalEpigraphCount = 0                   #counts total number of epigraphs in all files in directory
 epigraphlessFileCount = 0                #counts total number of files in directory that do not have epigraphs
                                        
-#connect to database--------------------------------------------------------------
+#connect to database --------------------------------------------------------------
 db = MySQLdb.connect(host="localhost",         #your host, usually localhost
-                     user="epigraphcollector", #your username
+                     user="collector",         #your username
                      passwd="123456",          #your password
-                     db="epigraphDB")          #database name
+                     db="EPIDB")               #database name
 cur = db.cursor()                              #cursor object will let you execute sql commands
 
-#create table in database with three elements--------------------------------------
-Command = "create table Epi(No int not null, Filename varchar(255) not null, Author varchar(255), Epigraph text, primary key(No));"  
+#create table in database with three elements --------------------------------------
+createCommand = "create table Epi(No int not null, Filename varchar(255) not null, Author varchar(255), Epigraph text, primary key(No));"  
 cur.execute(createCommand)
 
 #get list of files in current directory & put it in an array ---------------------
 allFilesInDirectory = [ i for i in listdir(getcwd()) if isfile(join(getcwd(),i)) ]
 
-#scrape epigraphs from all XML files----------------------------------------------
+#scrape epigraphs from all XML files ---------------------------------------------
 for x in xrange(0, len(allFilesInDirectory)):                   #for loop through all files in directory
     root, ext = os.path.splitext(allFilesInDirectory[x])        #select file extension for particular file "x" in the list "allFilesInDirectory"
     if (ext == '.xml'):                                         #if file ends in ".xml", read file 
@@ -39,28 +40,31 @@ for x in xrange(0, len(allFilesInDirectory)):                   #for loop throug
        readfile = open(str(allFilesInDirectory[x]))	        #specify file "x" to be read & open file
        soup = BeautifulSoup(readfile)                           #make "soup" object of file to search 
        
-    # strip author & epigraphs from individual file-------------------------------
+    # strip author & epigraphs from individual file -------------------------------
        authorlist = [author.text for author in soup('author')]          #collect entries tagged "author" and place it in the list "authorlist"
        epigraphlist = [epigraph.text for epigraph in soup('epigraph')]  #collect entries tagged "epigraph" and place it in the list "epigraphlist" 
 
-    # close file------------------------------------------------------------------
+    # close file -----------------------------------------------------------------
        readfile.close()                                                 #close file "x"
     
-    # record information to terminal & database-----------------------------------
+    # record information to terminal & database ----------------------------------
+       
        if (len(soup.findAll('epigraph')) == 0):                         #check if file has epigraphs                
-          # print allFilesInDirectory[x] + ": No epigraphs found."       #Error Test
+          # print allFilesInDirectory[x] + ": No epigraphs found."      #Error Test
           epigraphlessFileCount += 1                                    #note file did not have epigraph
        else:
           # output author, text, line, and epigraph to terminal and database   
           for i in xrange(0, len(soup.findAll('epigraph'))):          
              if (len(soup.findAll('author')) == 0):
                  print "Unknown Author" + "    " + allFilesInDirectory[x] + "    " + str(i+1) + "   " + epigraphlist[i]
-                 insertCommand = "insert into Epi values(" + str(i+1) + ", " + "'"+allFilesInDirectory[x] + "'"+"," + "'"+"Unknown Author" + "'"+"," + "'"+ epigraphlist[i] + "'"+");"
+                 # output to database 
+                 insertCommand = "insert into EPI values(" + str(totalEpigraphCount) + ", " + "'"+allFilesInDirectory[x] + "'"+"," + "'"+"Unknown Author" + "'"+"," + "'"+ re.escape(epigraphlist[i]) + "'"+");"
                  cur.execute(insertCommand)
                  totalEpigraphCount += 1
              else:    
                  print authorlist[0] + "    " + allFilesInDirectory[x] + "    " + str(i+1) + "   " + epigraphlist[i]
-                 insertCommand = "insert into Epi values(" + str(i+1) + ", " + "'"+allFilesInDirectory[x] + "'"+"," + "'"+authorlist[0] + "'"+"," + "'"+ epigraphlist[i] + "'"+");"
+                 # output to database
+                 insertCommand = "insert into EPI values(" + str(totalEpigraphCount) + ", " + "'"+allFilesInDirectory[x] + "'"+"," + "'"+authorlist[0] + "'"+"," + "'"+ re.escape(epigraphlist[i]) + "'"+");"
                  cur.execute(insertCommand)
                  totalEpigraphCount += 1
 
@@ -68,12 +72,12 @@ for x in xrange(0, len(allFilesInDirectory)):                   #for loop throug
 db.commit() 
 db.close()
 
-#Print total number of epigraphs collected to the terminal-------------------------
+#Print total number of epigraphs collected to the terminal -------------------------
 print "TOTAl NUMBER OF EPIGRAPHS: " + str(totalEpigraphCount)
 print "TOTAL NUMBER OF FILES: " + str(len(allFilesInDirectory))
 print "FILES WITHOUT EPIGRAPHS: " + str(epigraphlessFileCount)
 
-#CODE SNIPPETS THAT MAY BE USEFUL FOR FUTURE CHANGES-------------------------------
+#CODE SNIPPETS THAT MAY BE USEFUL FOR FUTURE CHANGES ------------------------------
 #Can directly access individual epigraph as follows:
 #soup('author')[0].text
 #soup('author')[1].text
