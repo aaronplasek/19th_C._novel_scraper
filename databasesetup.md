@@ -58,3 +58,6 @@ At "mysql>" prompt and logged on as "root" user, create a database named "EPIDB"
 You can see all the existing databases on the MySQL server via
 
 `SHOW DATABASES;`
+
+*Additional Resources*
+For a useful list of MySQL commands see http://www.pantz.org/software/mysql/mysqlcommands.html.
