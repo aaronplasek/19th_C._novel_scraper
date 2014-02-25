@@ -3,19 +3,19 @@
 
 *(1) Structure of the Epi Table:*
 
-| Field    | Type         | Null | Key | Default | Extra |
+| Field    | Type         | Null | Key | Default |
 
-+----------+--------------+------+-----+---------+-------+
++----------+--------------+------+-----+---------+
 
-| No       | int(11)      | NO   | PRI | NULL    |       |
+| No       | int(11)      | NO   | PRI | NULL    |
 
-| Filename | varchar(255) | NO   |     | NULL    |       |
+| Filename | varchar(255) | NO   |     | NULL    |
 
-| Author   | varchar(255) | YES  |     | NULL    |       |
+| Author   | varchar(255) | YES  |     | NULL    |
 
-| Epigraph | text         | YES  |     | NULL    |       |
+| Epigraph | text         | YES  |     | NULL    |
 
-+----------+--------------+------+-----+---------+-------+
++----------+--------------+------+-----+---------+
 
 
 *(2) Useful commands & syntax:*
