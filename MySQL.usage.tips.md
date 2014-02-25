@@ -1,8 +1,7 @@
 *Some Notes To Refer To When Using MySQL Commands*
+==========================
 
-(1) Structure of the Epi Table:
-
-+----------+--------------+------+-----+---------+-------+
+*(1) Structure of the Epi Table:*
 
 | Field    | Type         | Null | Key | Default | Extra |
 
@@ -19,13 +18,14 @@
 +----------+--------------+------+-----+---------+-------+
 
 
-(2) Useful commands & syntax:
-  [1] 'mysql -uroot -p' [from terminal] Logon to MySQL as Root to see all DBs
+*(2) Useful commands & syntax:*
   
-  [2] 'SELECT * FROM EPIDB.Epi'  Output all Data in Table
+  [1] `mysql -uroot -p` [from terminal] Logon to MySQL as Root to see all DBs
   
-  [3] 'SELECT No, Filename FROM EPIDB.Epi' Output Epigraph Number & Filename
+  [2] `SELECT * FROM EPIDB.Epi`  Output all Data in Table
   
-  [4] 'SELECT Author FROM EPIDB.Epi' Output Hypertext Author & Epigraph
+  [3] `SELECT No, Filename FROM EPIDB.Epi` Output Epigraph Number & Filename
   
-  [5] 'SELECT epigraph FROM Epi WHERE Filename = "brown.xml"' Output all Epigraphs from brown.xml file
+  [4] `SELECT Author FROM EPIDB.Epi` Output Hypertext Author & Epigraph
+  
+  [5] `SELECT epigraph FROM Epi WHERE Filename = 'brown.xml'` Output all Epigraphs from brown.xml file
