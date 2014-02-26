@@ -29,3 +29,5 @@
   [4] `SELECT Author FROM EPIDB.Epi` Output Hypertext Author & Epigraph
   
   [5] `SELECT epigraph FROM Epi WHERE Filename = 'brown.xml'` Output all Epigraphs from brown.xml file
+  
+  [6] `SELECT epigraph FROM Epi INTO OUTFILE '~/DESKTOP/allEpigraphs.txt'` Output all epigraphs into the file "allEpigraphs.txt" on user's Desktop
