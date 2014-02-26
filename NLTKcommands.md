@@ -15,9 +15,9 @@
 
 [5] `nltk.FreqDist([w.lower() for w in text])` Outputs frequency distribution
 
-[6] to making an concordance (example):
+[6] make a concordance (example):
 
-    `>>> emma = nltk.Text(nltk.corpus.gutenberg.words('austen-emma.txt'))`
+    `>>> emma = nltk.Text(nltk.corpus.gutenberg.words('austen-emma.txt'))`  
 
     `>>> emma.concordance("surprize")`
 
