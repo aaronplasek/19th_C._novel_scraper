@@ -1,7 +1,7 @@
 *USEFUL Natural Language Tool Kit (NLTK) COMMANDS & NOTES*
 ======================
 
-Useful commands----
+*Useful commands*
 
 [1] `len(set([word.lower() for word in text if word.isalpha()]))` Outputs vocabulary of text without double-counting the same word with different caplitalized letters (e.g., That & that, etc.)
 
@@ -37,7 +37,7 @@ Useful commands----
   
   `['the', 'of', 'and', 'to', 'a', 'in', 'that', 'is', ...]`
 
-*Syntax notes about python & NLTK----
+*Syntax notes about python & NLTK*
 
 [A] the expressions [f(x) for ...] (e.g., [f(x) for x in text]) and [x.f for ...] (e.g., [w.upper () for w in text]) is a common way to write python for loops where "f(x)" is a function that acts on every "x" throughout the list/array/string "text". 
 
