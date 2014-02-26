@@ -39,6 +39,6 @@
 
 *Syntax notes about python & NLTK*
 
-[A] the expressions [f(x) for ...] (e.g., [f(x) for x in text]) and [x.f for ...] (e.g., [w.upper () for w in text]) is a common way to write python for loops where "f(x)" is a function that acts on every "x" throughout the list/array/string "text". 
+[A] FOR LOOPS: the expressions [f(x) for ...] (e.g., [f(x) for x in text]) and [x.f for ...] (e.g., [w.upper () for w in text]) is a common way to write python for loops where "f(x)" is a function that acts on every "x" throughout the list/array/string "text". 
 
-[B]
+[B] SLICE NOTATION: "The characters of a string are accessed using indexes, counting from zero: 'Monty Python'[0] gives the value M...Substrings are accessed using slice notation: 'Monty Python'[1:5] gives the value "onty". If the start index is omitted, the substring begins at the start of the string; if the end index is omitted, the slice continues to the end of the string. (Closing summary, chapter 3, NLTK Book)
