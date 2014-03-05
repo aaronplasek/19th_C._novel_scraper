@@ -8,9 +8,9 @@
 
 # libraries & global variables ----------------------------------------------------
 from bs4 import BeautifulSoup            #BeautifulSoup parses XML tags.  http://www.crummy.com/software/BeautifulSoup/
-from os import walk, getcwd, listdir    #used to grab all files in directory of script
+from os import walk, getcwd, listdir     #used to grab all files in directory of script
 from os.path import isfile, join         #also used in grabbing all files in directory
-import os                                
+import os
 import csv                               #used to interact with csv files (not yet working)
 #import MySQLdb                          #used to interact with MySQL Database
 import re                                #handle escape characters for MySQL 
@@ -86,7 +86,7 @@ for x in xrange(0, len(allFilesInDirectory)):                   #for loop throug
              else:    
                  print authorlist[0] + "    " + allFilesInDirectory[x] + "    " + str(i+1) + "   " + epigraphlist[i]
                  # output to database
-                  insertCommand = "insert into Epi values("+ str(i+1) + ", " + "\""+allFilesInDirectory[x] + "\""+"," + "\""+authorlist[0] + "\""+"," + "\""+ epigraphlist[i] + "\""+");"
+                 insertCommand = "insert into Epi values("+ str(i+1) + ", " + "\""+allFilesInDirectory[x] + "\""+"," + "\""+authorlist[0] + "\""+"," + "\""+ epigraphlist[i] + "\""+");"
                  try:
                      cur.execute(insertCommand)
                  except sqlite3.Error,e:
