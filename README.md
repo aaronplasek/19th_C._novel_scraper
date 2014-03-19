@@ -1,6 +1,6 @@
 *TEI/XML Epigraph Scraper*
 ================
-This script pulls XML-tagged content (including epigraphs specifically) from all the XML files in a directory and outputs this information to both the terminal and to a MySQL database. This script was written and tested on a Macbook Pro (OS 10.9.1) using python 2.7.1. It should also work on Linux/Unix. You will need to install Beautiful Soup.
+This script pulls XML-tagged content from all the XML files in a directory. This script was written and tested on Macbook Pro and an iMac (both using OS 10.9) using python 2.7.6. It will also work in Linux/Unix. You will need to install Beautiful Soup.
 
 *Instructions*
 =============
@@ -10,10 +10,3 @@ This script pulls XML-tagged content (including epigraphs specifically) from all
 
 (3) The current "working directory" of your terminal needs to be the same directory in which you are running your script! 
 
-*Future Features*
-================
-(1) Will add other attribute-grabbing features, including title, publication date, epigraph author, and more.
-
-(2) Will add the ability to include part-of-speech information for epigraphs and titles. 
-
-(3) Will add the ability to output to a csv file.
