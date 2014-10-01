@@ -26,8 +26,19 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
     # strip author & epigraphs from individual file
         author_list = [author.text for author in soup('author')]          #collect entries tagged "author" and place it in the list "authorlist"
         epigraph_list = [epigraph.text for epigraph in soup('epigraph')]  #collect entries tagged "epigraph" and place it in the list "epigraphlist'; note that soup.find_all("tag") == soup("tag")
-        epi_attrib = [soup.epigraph.bibl.text for bibl in soup.find('epigraph').find('bibl')]
-        print(epi_attrib)
+        epigraph_attribution = []
+        for epi in soup('epigraph'):
+            if epi.has_key('bibl'): 
+                epigraph_attribution[epi].extend(soup.epigraph.bibl.text)
+            else:
+                epigraph_attribution[epi].extend("No Attribution")
+
+
+        print("NUM of soup('epigraph'): " + str(len(soup('epigraph'))))
+        print("NUM OF soup('bibl')" + str(len(soup('bibl'))))
+        #print("soup.epigraph.bibl.string: " + str(soup.epigraph.bibl)
+        #epi_attrib = [soup.epigraph.bibl.text for bibl in soup.find('epigraph').find('bibl')]
+        #print(epi_attrib)
         #epigraph_attrib = [ ]
         #for epigraph in soup('epigraph'):
         #    epigraph_list.append(epigraph.text)
@@ -40,10 +51,10 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
         else:
             for i in range(0, len(soup.findAll('epigraph'))):          
                 if (len(soup.findAll('author')) == 0):
-                    print("Unknown Author" + "\n" + allFilesInDirectory[document] + "\n" + str(i+1) + "\n" + epigraph_list[i] + "\n")# + epi_attrib[i] + "\n")
+                    print("Unknown Author" + "\n" + allFilesInDirectory[document] + "\n" + str(i+1) + "\n" + epigraph_list[i] + "\n" + epigraph_attribution[i] + "\n")
                     totalEpigraphCount += 1
                 else:    
-                    print(author_list[0] + "\n" + allFilesInDirectory[document] + "\n" + str(i+1) + "\n" + epigraph_list[i]+"\n")#+ epi_attrib[i] + "\n")
+                    print(author_list[0] + "\n" + allFilesInDirectory[document] + "\n" + str(i+1) + "\n" + str(epigraph_list[i])+"\n" + epigraph_attribution[i] + "\n")
                     totalEpigraphCount += 1
         
 #Print total number of epigraphs collected to the terminal -------------------------
