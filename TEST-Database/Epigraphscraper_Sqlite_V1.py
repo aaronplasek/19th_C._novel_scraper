@@ -1,4 +1,4 @@
-
+# FOR USE WITH PYTHON 2.x (but not PYTHON 3.x)
 #see readme file before using! 
 
 #libraries & Global variables ----------------------------------------------------
@@ -10,7 +10,6 @@ import csv
 import re
 import sqlite3
 import sys
-
 
 totalEpigraphCount = 0
 epigraphlessFileCount = 0
