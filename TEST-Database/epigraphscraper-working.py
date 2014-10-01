@@ -21,21 +21,24 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
     root, ext = os.path.splitext(allFilesInDirectory[document])        #select file extension for particular file "x" in the list "allFilesInDirectory"
     if (ext == '.xml'):                                         #if file ends in ".xml", read file 
     # open file to be read
+        print("Begin LOOP: " + allFilesInDirectory[document])
         readfile = open(str(allFilesInDirectory[document]))	        #specify file "x" to be read & open file
         soup = BeautifulSoup(readfile)                           #make "soup" object of file to search 
     # strip author & epigraphs from individual file
         author_list = [author.text for author in soup('author')]          #collect entries tagged "author" and place it in the list "authorlist"
         epigraph_list = [epigraph.text for epigraph in soup('epigraph')]  #collect entries tagged "epigraph" and place it in the list "epigraphlist'; note that soup.find_all("tag") == soup("tag")
         epigraph_attribution = []
-        for epi in soup('epigraph'):
-            if epi.has_key('bibl'): 
-                epigraph_attribution[epi].extend(soup.epigraph.bibl.text)
-            else:
-                epigraph_attribution[epi].extend("No Attribution")
+        if len(soup('epigraph')) > 0:
+            for epi in soup('epigraph'):
+                print("HELLO:" + str(epi.contents))
+                if 'bibl' in str(epi.contents):
+                #if epi.has_attr('bibl'): 
+                    epigraph_attribution.extend(str(soup.epigraph.bibl.text))
+                    print("Attribution: " + str(soup.epigraph.bibl.text))            
+                else:
+                    epigraph_attribution.extend("No Attribution")
+        #           print("No Attribution")
 
-
-        print("NUM of soup('epigraph'): " + str(len(soup('epigraph'))))
-        print("NUM OF soup('bibl')" + str(len(soup('bibl'))))
         #print("soup.epigraph.bibl.string: " + str(soup.epigraph.bibl)
         #epi_attrib = [soup.epigraph.bibl.text for bibl in soup.find('epigraph').find('bibl')]
         #print(epi_attrib)
@@ -44,23 +47,26 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
         #    epigraph_list.append(epigraph.text)
         #epigraph_attrib.append
         #epi_attrib = [bibl.text for epigraph in soup('epigraph')]
+        
+# Error Checking Print-To-Terminal: print all information collected
         readfile.close()                                                 #close file "x"
-        if (len(soup.findAll('epigraph')) == 0):                         #check if file has epigraphs                
+        if (len(soup('epigraph')) == 0):                         #check if file has epigraphs                
             print(allFilesInDirectory[document] + ": No epigraphs found.")       #Error Test
             epigraphlessFileCount += 1                                    #note file did not have epigraph
         else:
             for i in range(0, len(soup.findAll('epigraph'))):          
                 if (len(soup.findAll('author')) == 0):
-                    print("Unknown Author" + "\n" + allFilesInDirectory[document] + "\n" + str(i+1) + "\n" + epigraph_list[i] + "\n" + epigraph_attribution[i] + "\n")
+                    print("Unknown Author" + "\n" + allFilesInDirectory[document] + "\n" + str(i+1) + "\n" + str(epigraph_list[i]) + "\n" + epigraph_attribution[i] + "\n")
                     totalEpigraphCount += 1
                 else:    
                     print(author_list[0] + "\n" + allFilesInDirectory[document] + "\n" + str(i+1) + "\n" + str(epigraph_list[i])+"\n" + epigraph_attribution[i] + "\n")
                     totalEpigraphCount += 1
         
-#Print total number of epigraphs collected to the terminal -------------------------
+#Error Checking Print-To-Terminal: Print total number of epigraphs collected  
 print("TOTAl NUMBER OF EPIGRAPHS: " + str(totalEpigraphCount))
 print("TOTAL NUMBER OF FILES: " + str(len(allFilesInDirectory)))
 print("FILES WITHOUT EPIGRAPHS: " + str(epigraphlessFileCount))
+print("ATTRIBUTIONS: " + str(epigraph_attribution))
 
 #CODE SNIPPETS THAT MAY BE USEFUL FOR FUTURE CHANGES ------------------------------
 #Can directly access individual epigraph as follows:
