@@ -26,40 +26,14 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
         soup = BeautifulSoup(readfile)                           #make "soup" object of file to search 
     # strip author & epigraphs from individual file
         author_list = [author.text for author in soup('author')]          #collect entries tagged "author" and place it in the list "authorlist"
-        epigraph_list = [epigraph.text for epigraph in soup('epigraph')]  #collect entries tagged "epigraph" and place it in the list "epigraphlist'; note that soup.find_all("tag") == soup("tag")
-        #epigraph_attribution = [epigraph.bibl.text for epigraph in soup.find_all]
-        
-
-        #bibls_in_epigraphs = [epigraph.bibl.text for bibl in soup.find_all('bibl')]
-        #print(bibls_in_epigraphs)
-        #epigraph_attribution = [epigraph.bibl.text if epigraph.has_attr('bibl') else "No Attribution" for epigraph in soup('epigraph') if len(soup('epigraph')) > 0]
-        epigraph_attribution = [soup.findAll('epigraph', {'default' : 'false'}) for epigraph in soup('epigraph')] 
-        print(epigraph_attribution)
-      #  for link in soup.find_all('a'):
-    #print(link.get('href'))
-
-
-        #if len(soup('epigraph')) > 0:
-            #token = 'bibl'
-            #for epigraph in range(0, len(epigraph_list)):
-                #print("HELLO:" + str(epi.contents))
-                #if 'bibl' in soup('epigraph)
-                    #print("yes: " + epigraph)
-                #if epi.has_attr('bibl'): 
-                    #epigraph_attribution.extend(str(soup.epigraph.bibl.text))
-                    #print("Attribution: " + str(soup.epigraph.bibl.text))            
-                #else:
-                    #epigraph_attribution.append("No Attribution")
-                    #print("No Attribution")
-
-        #print("soup.epigraph.bibl.string: " + str(soup.epigraph.bibl)
-        #epi_attrib = [soup.epigraph.bibl.text for bibl in soup.find('epigraph').find('bibl')]
-        #print(epi_attrib)
-        #epigraph_attrib = [ ]
-        #for epigraph in soup('epigraph'):
-        #    epigraph_list.append(epigraph.text)
-        #epigraph_attrib.append
-        #epi_attrib = [bibl.text for epigraph in soup('epigraph')]
+        if len(soup('epigraph')) > 0:
+            epigraph_list = [epigraph.text for epigraph in soup('epigraph')]  #collect entries tagged "epigraph" and place it in the list "epigraphlist'; note that soup.find_all("tag") == soup("tag")
+            epigraph_attribution = ["No Attribution" if soup('epigraph')[epigraphs].bibl == None \
+                                                 else soup('epigraph')[epigraphs].bibl.text \
+                                                 for epigraphs in range(0,len(soup('epigraph')))]
+        else: 
+            epigraph_list = ['No Epigraphs']
+            epigraph_attribution = ['No Epigraphs']
         
 # Error Checking Print-To-Terminal: print all information collected
         readfile.close()                                                 #close file "x"
@@ -79,18 +53,26 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
 print("TOTAl NUMBER OF EPIGRAPHS: " + str(totalEpigraphCount))
 print("TOTAL NUMBER OF FILES: " + str(len(allFilesInDirectory)))
 print("FILES WITHOUT EPIGRAPHS: " + str(epigraphlessFileCount))
-#print("ATTRIBUTIONS: " + epigraph_attribution)
 
-#CODE SNIPPETS THAT MAY BE USEFUL FOR FUTURE CHANGES ------------------------------
+
+#brown.xml has 15 bibl entries and 25 epigraphs total
+
+
+#CODE SNIPPETS & USEFUL NOTES ----
 #Can directly access individual epigraph as follows:
 #soup('author')[0].text
 #soup('author')[1].text
 #soup('epigraph')[0].text
 #soup('epigraph')[1].text
-#THIS SHOULD WORK: out.writerow(authorlist[2] + "    " + allFilesInDirectory[x] + "    "
-# + str(i) + "   " + epigraph[i])
+#etc.
+
+#THIS SHOULD WORK FOR OUTPUT TO CSV ----
+#out.writerow(authorlist[2] + "    " + allFilesInDirectory[x] + "    " + str(i) + "   " + epigraph[i])
 #out = csv.writer(open("epigraph.csv","wb"), delimiter='\t',quoting=csv.QUOTE_MINIMAL) 
 
+#NOTE FOR BEAUTIFUL SOUP: soup('epigraph') == soup.find_all('epigraph')
+
+#CORRECT VALUES FOR TEST DATABASE ----
 #TOTAl NUMBER OF EPIGRAPHS: 28
 #TOTAL NUMBER OF FILES: 13
 #FILES WITHOUT EPIGRAPHS: 6
