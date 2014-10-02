@@ -27,17 +27,30 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
     # strip author & epigraphs from individual file
         author_list = [author.text for author in soup('author')]          #collect entries tagged "author" and place it in the list "authorlist"
         epigraph_list = [epigraph.text for epigraph in soup('epigraph')]  #collect entries tagged "epigraph" and place it in the list "epigraphlist'; note that soup.find_all("tag") == soup("tag")
-        epigraph_attribution = []
-        if len(soup('epigraph')) > 0:
-            for epi in soup('epigraph'):
-                print("HELLO:" + str(epi.contents))
-                if 'bibl' in str(epi.contents):
+        #epigraph_attribution = [epigraph.bibl.text for epigraph in soup.find_all]
+        
+
+        #bibls_in_epigraphs = [epigraph.bibl.text for bibl in soup.find_all('bibl')]
+        #print(bibls_in_epigraphs)
+        #epigraph_attribution = [epigraph.bibl.text if epigraph.has_attr('bibl') else "No Attribution" for epigraph in soup('epigraph') if len(soup('epigraph')) > 0]
+        epigraph_attribution = [soup.findAll('epigraph', {'default' : 'false'}) for epigraph in soup('epigraph')] 
+        print(epigraph_attribution)
+      #  for link in soup.find_all('a'):
+    #print(link.get('href'))
+
+
+        #if len(soup('epigraph')) > 0:
+            #token = 'bibl'
+            #for epigraph in range(0, len(epigraph_list)):
+                #print("HELLO:" + str(epi.contents))
+                #if 'bibl' in soup('epigraph)
+                    #print("yes: " + epigraph)
                 #if epi.has_attr('bibl'): 
-                    epigraph_attribution.extend(str(soup.epigraph.bibl.text))
-                    print("Attribution: " + str(soup.epigraph.bibl.text))            
-                else:
-                    epigraph_attribution.extend("No Attribution")
-        #           print("No Attribution")
+                    #epigraph_attribution.extend(str(soup.epigraph.bibl.text))
+                    #print("Attribution: " + str(soup.epigraph.bibl.text))            
+                #else:
+                    #epigraph_attribution.append("No Attribution")
+                    #print("No Attribution")
 
         #print("soup.epigraph.bibl.string: " + str(soup.epigraph.bibl)
         #epi_attrib = [soup.epigraph.bibl.text for bibl in soup.find('epigraph').find('bibl')]
@@ -56,17 +69,17 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
         else:
             for i in range(0, len(soup.findAll('epigraph'))):          
                 if (len(soup.findAll('author')) == 0):
-                    print("Unknown Author" + "\n" + allFilesInDirectory[document] + "\n" + str(i+1) + "\n" + str(epigraph_list[i]) + "\n" + epigraph_attribution[i] + "\n")
+                    print("Unknown Author" + "\n" + allFilesInDirectory[document] + "\n" + str(i+1) + "\n") #+ str(epigraph_attribution[i]) + "\n")# + str(epigraph_list[i]) + "\n") + str(epigraph_attribution[i]) + "\n")
                     totalEpigraphCount += 1
                 else:    
-                    print(author_list[0] + "\n" + allFilesInDirectory[document] + "\n" + str(i+1) + "\n" + str(epigraph_list[i])+"\n" + epigraph_attribution[i] + "\n")
+                    print(author_list[0] + "\n" + allFilesInDirectory[document] + "\n" + str(i+1) + "\n")# + str(epigraph_attribution[i]) + "\n")#  + str(epigraph_list[i])+"\n")# 
                     totalEpigraphCount += 1
         
 #Error Checking Print-To-Terminal: Print total number of epigraphs collected  
 print("TOTAl NUMBER OF EPIGRAPHS: " + str(totalEpigraphCount))
 print("TOTAL NUMBER OF FILES: " + str(len(allFilesInDirectory)))
 print("FILES WITHOUT EPIGRAPHS: " + str(epigraphlessFileCount))
-print("ATTRIBUTIONS: " + str(epigraph_attribution))
+#print("ATTRIBUTIONS: " + epigraph_attribution)
 
 #CODE SNIPPETS THAT MAY BE USEFUL FOR FUTURE CHANGES ------------------------------
 #Can directly access individual epigraph as follows:
