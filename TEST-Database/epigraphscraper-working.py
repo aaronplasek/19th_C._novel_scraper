@@ -11,7 +11,7 @@ import sys                               #take input from command line
 # variables
 totalEpigraphCount = 0                   #number of epigraphs in all files in directory
 epigraphlessFileCount = 0                #number of files in directory that do not have epigraphs
-
+characters_to_be_removed_from_attribution = '\n'          #characters to be removed from epigraph attributions
 
 #get list of files in current directory & put it in an array
 allFilesInDirectory = [ filename for filename in listdir(getcwd()) if filename.endswith('.xml')] #get filenames in current directory ending in ".xml"
@@ -21,11 +21,13 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
     root, ext = os.path.splitext(allFilesInDirectory[document])        #select file extension for particular file "x" in the list "allFilesInDirectory"
     if (ext == '.xml'):                                         #if file ends in ".xml", read file 
     # open file to be read
-        print("Begin LOOP: " + allFilesInDirectory[document])
+        print("TEXT " + str(document+1) + ': ' + allFilesInDirectory[document])
         readfile = open(str(allFilesInDirectory[document]))	        #specify file "x" to be read & open file
         soup = BeautifulSoup(readfile)                           #make "soup" object of file to search 
-    # strip author & epigraphs from individual file
+    # collect author & epigraphs from individual file
         author_list = [author.text for author in soup('author')]          #collect entries tagged "author" and place it in the list "authorlist"
+        print(author_list)
+
         if len(soup('epigraph')) > 0:
             epigraph_list = [epigraph.text for epigraph in soup('epigraph')]  #collect entries tagged "epigraph" and place it in the list "epigraphlist'; note that soup.find_all("tag") == soup("tag")
             epigraph_attribution = ["No Attribution" if soup('epigraph')[epigraphs].bibl == None \
@@ -34,19 +36,28 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
         else: 
             epigraph_list = ['No Epigraphs']
             epigraph_attribution = ['No Epigraphs']
-        
+    # clean out "/n" characters in attribution
+        for attribution in range(0,len(epigraph_attribution)):
+            cleaned_text = ""
+            for character in epigraph_attribution[attribution]:
+                if character not in characters_to_be_removed_from_attribution:
+                    cleaned_text += character 
+            epigraph_attribution[attribution] = cleaned_text   
+
 # Error Checking Print-To-Terminal: print all information collected
         readfile.close()                                                 #close file "x"
         if (len(soup('epigraph')) == 0):                         #check if file has epigraphs                
-            print(allFilesInDirectory[document] + ": No epigraphs found.")       #Error Test
+            print(allFilesInDirectory[document] + ": No epigraphs found." + '\n')       #Error Test
             epigraphlessFileCount += 1                                    #note file did not have epigraph
         else:
             for i in range(0, len(soup.findAll('epigraph'))):          
                 if (len(soup.findAll('author')) == 0):
-                    print("Unknown Author" + "\n" + allFilesInDirectory[document] + "\n" + str(i+1) + "\n") #+ str(epigraph_attribution[i]) + "\n")# + str(epigraph_list[i]) + "\n") + str(epigraph_attribution[i]) + "\n")
+                    print("Unknown Author" + "\n" + allFilesInDirectory[document] + "\n" + "Text " + str(document+1) \
+                         + ", epigraph " + str(i+1) + "\n" + str(epigraph_attribution[i]) + "\n" + str(epigraph_list[i]) + "\n") 
                     totalEpigraphCount += 1
                 else:    
-                    print(author_list[0] + "\n" + allFilesInDirectory[document] + "\n" + str(i+1) + "\n")# + str(epigraph_attribution[i]) + "\n")#  + str(epigraph_list[i])+"\n")# 
+                    print(author_list[0] + "\n" + allFilesInDirectory[document] + "\n" + "Text " + str(document+1) \
+                         + ", epigraph " + str(i+1) + "\n" + str(epigraph_attribution[i]) + "\n" + str(epigraph_list[i]) + "\n") 
                     totalEpigraphCount += 1
         
 #Error Checking Print-To-Terminal: Print total number of epigraphs collected  
