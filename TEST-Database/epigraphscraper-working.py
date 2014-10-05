@@ -1,12 +1,12 @@
 #for use with python 3.x; only gets xml files in current directory
 
 # libraries
-from bs4 import BeautifulSoup            
+from bs4 import BeautifulSoup            #used to select XML tags and parse document
 from os import walk, getcwd, listdir     #used to grab all files in directory of script
 import os                                
-import csv                               #used to interact with csv files (not yet working)
-import re                                #handle escape characters for MySQL 
-import sys                               #take input from command line
+import csv                               #to interact with csv files (not yet working)
+import re                                # use regular expressions to standardize authors
+#import sys                              #take input from command line
 
 # variables
 totalEpigraphCount = 0                   #number of epigraphs in all files in directory
@@ -36,7 +36,7 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
         else: 
             epigraph_list = ['No Epigraphs']
             epigraph_attribution = ['No Epigraphs']
-    # clean out "/n" characters in attribution
+    # clean out "/n" characters in epigraph attributions
         for attribution in range(0,len(epigraph_attribution)):
             cleaned_text = ""
             for character in epigraph_attribution[attribution]:
@@ -44,10 +44,16 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
                     cleaned_text += character 
             epigraph_attribution[attribution] = cleaned_text   
 
+    # standardize names in author list
+    # generate a dict for first and last names based on corpus entries for XML texts
+
+    reg_ex_for_year = re.compile(r'^(10|11|12|13|14|15|16|17|18|19|20)\d{2}$') #find 4-digit year b/w 1000 & 2999
+
+
 # Error Checking Print-To-Terminal: print all information collected
         readfile.close()                                                 #close file "x"
         if (len(soup('epigraph')) == 0):                         #check if file has epigraphs                
-            print(allFilesInDirectory[document] + ": No epigraphs found." + '\n')       #Error Test
+            print('Author: ' + author_list[0] + '\n' + "No epigraphs found." + '\n')       #Error Test
             epigraphlessFileCount += 1                                    #note file did not have epigraph
         else:
             for i in range(0, len(soup.findAll('epigraph'))):          
