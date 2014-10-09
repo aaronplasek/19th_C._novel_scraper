@@ -8,12 +8,22 @@ import csv                               #used to interact with csv files (not y
 import re                                #handle escape characters for MySQL 
 import sys                               #take input from command line
 
-# variables
+# variables & functions
 totalEpigraphCount = 0                   #number of epigraphs in all files in directory
 epigraphlessFileCount = 0                #number of files in directory that do not have epigraphs
 characters_to_be_removed_from_attribution = '\n'          #characters to be removed from epigraph attributions
 
-#get list of files in current directory & put it in an array
+def remove_characters(listofstrings, characters_to_be_removed):
+    for string in range(0,len(listofstrings)):
+        cleaned_text = ""
+        for character in listofstrings[string]:
+            if character not in characters_to_be_removed:
+                cleaned_text += character 
+        listofstrings[string] = cleaned_text 
+    return listofstrings 
+
+
+# PROGRAM ---
 allFilesInDirectory = [ filename for filename in listdir(getcwd()) if filename.endswith('.xml')] #get filenames in current directory ending in ".xml"
 
 #scrape epigraphs from all XML files
@@ -30,6 +40,7 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
         publication_date = [date.text for date in soup('date')]
         publication_place = [pubplace.text for pubplace in soup('pubplace')]
 
+
         if len(soup('publisher')) > 0:         
             publishers = [publisher.text for publisher in soup('publisher')]
         else: 
@@ -43,50 +54,24 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
         else: 
             epigraph_list = ['No Epigraphs']
             epigraph_attribution = ['No Epigraphs']
-    
-    # clean out "/n" characters in attribution
-        for attribution in range(0,len(epigraph_attribution)):
-            cleaned_text = ""
-            for character in epigraph_attribution[attribution]:
-                if character not in characters_to_be_removed_from_attribution:
-                    cleaned_text += character 
-            epigraph_attribution[attribution] = cleaned_text   
-    # clean out "\n" characters in author name
-        for authorname in range(0, len(author_list)):
-            cleaned_text = ""
-            for character in author_list[authorname]:
-                if character not in characters_to_be_removed_from_attribution:
-                    cleaned_text += character
-            author_list[authorname] = cleaned_text
-     # clean out "\n" characters in titles
-        for title in range(0, len(title_list)):
-            cleaned_text = ""
-            for character in title_list[title]:
-                if character not in characters_to_be_removed_from_attribution:
-                    cleaned_text += character
-            title_list[title] = cleaned_text
-        for place in range(0, len(publication_place)):
-            cleaned_text = ""
-            for character in publication_place[place]:
-                if character not in characters_to_be_removed_from_attribution:
-                    cleaned_text += character
-            publication_place[place] = cleaned_text
-    # clean publisher names
-        for pubs in range(0, len(publishers)):
-            cleaned_text = ""
-            for character in publishers[pubs]:
-                if character not in characters_to_be_removed_from_attribution:
-                    cleaned_text += character
-            publishers[pubs] = cleaned_text
-    # clean publication years        
-        for year in range(0, len(publication_date)):
-            cleaned_text = ""
-            for character in publication_date[year]:
-                if character not in characters_to_be_removed_from_attribution:
-                    cleaned_text += character
-            publication_date[year] = cleaned_text                                       
+
+    # remove "/n" characters
+        epigraph_attribution = remove_characters(epigraph_attribution, '\n')
+        author_list = remove_characters(author_list, '\n')
+        title_list = remove_characters(title_list, '\n')
+        publication_place = remove_characters(publication_place, '\n')
+        publishers = remove_characters(publishers, '\n')
+        publication_date = remove_characters(publication_date, '\n')                                     
 
         readfile.close() #close file "x"
+
+#Checking for Epigraphs with different XML tags
+        print('epigraph' + str(len(soup('epigraph'))))
+        print('quote'+ str(len(soup('quote'))))
+
+
+
+
 # Error Checking Print-To-Terminal: print all information collected
         if (len(soup('epigraph')) == 0):                         #check if file has epigraphs                
 #            print(allFilesInDirectory[document] + ": No epigraphs found." + '\n')       #Error Test
@@ -103,7 +88,6 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
                     totalEpigraphCount += 1
 
 #output to a CSV file -- NOTE: need to wrap strings in a list for csvwriter to output properly
-       
         with open('epigraph_metadata.csv', 'a') as csvfile: #output metadata
             epi_meta = csv.writer(csvfile, dialect='excel')
             #epi_meta.writerow('epigraph ID' + '  |  ' + 'File Name' + '  |  ' +'File ID' + '  |  ' +'Hypotext Author' + '  |  ' + '  |  '+ 'Title'+ 'Epigraph Attribution') 
