@@ -54,7 +54,6 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
         else: 
             epigraph_list = ['No Epigraphs']
             epigraph_attribution = ['No Epigraphs']
-<<<<<<< HEAD
 
     # remove "/n" characters
         epigraph_attribution = remove_characters(epigraph_attribution, '\n')
@@ -63,83 +62,21 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
         publication_place = remove_characters(publication_place, '\n')
         publishers = remove_characters(publishers, '\n')
         publication_date = remove_characters(publication_date, '\n')                                     
-=======
-<<<<<<< HEAD
-    # clean out "/n" characters in epigraph attributions
-=======
     
-    # clean out "/n" characters in attribution
->>>>>>> 47ed28052f2dd71f4e99fb6b65a053be16b366e2
-        for attribution in range(0,len(epigraph_attribution)):
-            cleaned_text = ""
-            for character in epigraph_attribution[attribution]:
-                if character not in characters_to_be_removed_from_attribution:
-                    cleaned_text += character 
-            epigraph_attribution[attribution] = cleaned_text   
-    # clean out "\n" characters in author name
-        for authorname in range(0, len(author_list)):
-            cleaned_text = ""
-            for character in author_list[authorname]:
-                if character not in characters_to_be_removed_from_attribution:
-                    cleaned_text += character
-            author_list[authorname] = cleaned_text
-     # clean out "\n" characters in titles
-        for title in range(0, len(title_list)):
-            cleaned_text = ""
-            for character in title_list[title]:
-                if character not in characters_to_be_removed_from_attribution:
-                    cleaned_text += character
-            title_list[title] = cleaned_text
-        for place in range(0, len(publication_place)):
-            cleaned_text = ""
-            for character in publication_place[place]:
-                if character not in characters_to_be_removed_from_attribution:
-                    cleaned_text += character
-            publication_place[place] = cleaned_text
-    # clean publisher names
-        for pubs in range(0, len(publishers)):
-            cleaned_text = ""
-            for character in publishers[pubs]:
-                if character not in characters_to_be_removed_from_attribution:
-                    cleaned_text += character
-            publishers[pubs] = cleaned_text
-    # clean publication years        
-        for year in range(0, len(publication_date)):
-            cleaned_text = ""
-            for character in publication_date[year]:
-                if character not in characters_to_be_removed_from_attribution:
-                    cleaned_text += character
-            publication_date[year] = cleaned_text                                       
->>>>>>> 32f70ec0607b38e8faf0cbac4495490b6592e286
-
-<<<<<<< HEAD
     # standardize names in author list
     # generate a dict for first and last names based on corpus entries for XML texts
+    #reg_ex_for_year = re.compile(r'^(10|11|12|13|14|15|16|17|18|19|20)\d{2}$') #find 4-digit year b/w 1000 & 2999
 
-    reg_ex_for_year = re.compile(r'^(10|11|12|13|14|15|16|17|18|19|20)\d{2}$') #find 4-digit year b/w 1000 & 2999
-
-
-=======
         readfile.close() #close file "x"
-<<<<<<< HEAD
 
 #Checking for Epigraphs with different XML tags
         print('epigraph' + str(len(soup('epigraph'))))
         print('quote'+ str(len(soup('quote'))))
 
-
-
-
-=======
->>>>>>> 47ed28052f2dd71f4e99fb6b65a053be16b366e2
->>>>>>> 32f70ec0607b38e8faf0cbac4495490b6592e286
 # Error Checking Print-To-Terminal: print all information collected
         if (len(soup('epigraph')) == 0):                         #check if file has epigraphs                
-<<<<<<< HEAD
             print('Author: ' + author_list[0] + '\n' + "No epigraphs found." + '\n')       #Error Test
-=======
-#            print(allFilesInDirectory[document] + ": No epigraphs found." + '\n')       #Error Test
->>>>>>> 47ed28052f2dd71f4e99fb6b65a053be16b366e2
+#           print(allFilesInDirectory[document] + ": No epigraphs found." + '\n')       #Error Test
             epigraphlessFileCount += 1                                    #note file did not have epigraph
         else:
             for i in range(0, len(soup.findAll('epigraph'))):          
@@ -167,8 +104,6 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
             for i in range(0,len(soup('epigraph'))):
                 epi_list.writerow(['Text ' + str(document+1)+ ', epigraph ' + str(i+1)]) 
                 epi_list.writerow([epigraph_list[i]])           
-
-
         
 #Error Checking Print-To-Terminal: Print total number of epigraphs collected  
 print("TOTAl NUMBER OF EPIGRAPHS: " + str(totalEpigraphCount))
