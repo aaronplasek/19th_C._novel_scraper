@@ -39,6 +39,11 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
         title_list = [title.text for title in soup('title')]              #collect "title" tag entries
         publication_date = [date.text for date in soup('date')]
         publication_place = [pubplace.text for pubplace in soup('pubplace')]
+        
+
+        total_epigraph_tags = str(len(soup('epigraph'))) # for Error check
+        total_quote_tags = str(len(soup('quote')))       # for Error check
+        encoding_credit = [editorialDecl.text for editorialDecl in soup('editorialDecl')] 
 
 
         if len(soup('publisher')) > 0:         
@@ -61,7 +66,7 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
         title_list = remove_characters(title_list, '\n')
         publication_place = remove_characters(publication_place, '\n')
         publishers = remove_characters(publishers, '\n')
-        publication_date = remove_characters(publication_date, '\n')                                     
+        publication_date = remove_characters(publication_date, '\n')                                    
     
     # standardize names in author list
     # generate a dict for first and last names based on corpus entries for XML texts
@@ -70,14 +75,21 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
         readfile.close() #close file "x"
 
 #Checking for Epigraphs with different XML tags
-        print('epigraph' + str(len(soup('epigraph'))))
-        print('quote'+ str(len(soup('quote'))))
+        print('epigraph :: quote = ' + str(len(soup('epigraph'))) + " :: " + str(len(soup('quote'))))
 
 # Error Checking Print-To-Terminal: print all information collected
         if (len(soup('epigraph')) == 0):                         #check if file has epigraphs                
-            print('Author: ' + author_list[0] + '\n' + "No epigraphs found." + '\n')       #Error Test
-#           print(allFilesInDirectory[document] + ": No epigraphs found." + '\n')       #Error Test
-            epigraphlessFileCount += 1                                    #note file did not have epigraph
+            print(str(author_list) + '  :: document =' + str(document))
+        if (len(soup('epigraph')) == 0):
+            if (len(soup('author')) > 0):
+                print('Author: ' + author_list[0] + '\n' + "No epigraphs found." + '\n')       #Error Test
+#               print(allFilesInDirectory[document] + ": No epigraphs found." + '\n')       #Error Test
+                epigraphlessFileCount += 1     
+            else:
+                if (len(soup('author')) == 0):
+                    print('Author:' + 'NO AUTHOR TAG IN FILE. CHECK XML FILE! \n' + "No epigraphs found. \n") 
+                    author_list = ['NO AUTHOR TAG IN FILE. CHECK XML FILE!']
+                    epigraphlessFileCount += 1 
         else:
             for i in range(0, len(soup.findAll('epigraph'))):          
                 if (len(soup.findAll('author')) == 0):
@@ -104,6 +116,28 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
             for i in range(0,len(soup('epigraph'))):
                 epi_list.writerow(['Text ' + str(document+1)+ ', epigraph ' + str(i+1)]) 
                 epi_list.writerow([epigraph_list[i]])           
+
+        #output ratio of epigraphs-to-quotes for each file, warnings, & error checks
+        with open('epigraph_to_quotes.csv', 'a') as csvfile: 
+            epi_to_quote = csv.writer(csvfile, dialect='excel')
+            if (document == 0):
+                epi_to_quote.writerow(['file number' + '|' + 'file name' + '|' + 'file encoding credits' + '|' + 'total epigraph tags' + '|' + 'total quote tags' + 'list of all author entries in file' + '|' + 'epigraph tags paired?' + '|' + 'quote tags paired?' ])
+            
+            author_error_check = 'Field Empty -- ERROR'
+            if len(soup('author')) == 0:
+                author_error_check = 'No Author Tags!'
+            else:
+                author_error_check = str(soup('author'))
+
+            total_epigraph_tags_error_check = 'All epigraph tags are paired'
+            if (int(total_epigraph_tags) % 2 != 0):
+                total_epigraph_tags_error_check = 'WARNING: Not all epigraph tags are paired'
+
+            total_quote_tags_error_check = 'All quote tags are paired'
+            if (int(total_quote_tags) % 2 == 0):
+                total_quote_tags_error_check = 'WARNING: Not all quote tags are paired'   
+
+            epi_to_quote.writerow([str(document) + '|' + str(allFilesInDirectory[document]) + '|' +  str(encoding_credit) + '|' + total_epigraph_tags + '|' + total_quote_tags + '|' + author_error_check + '|' + total_epigraph_tags_error_check + '|' + total_quote_tags_error_check])
         
 #Error Checking Print-To-Terminal: Print total number of epigraphs collected  
 print("TOTAl NUMBER OF EPIGRAPHS: " + str(totalEpigraphCount))
