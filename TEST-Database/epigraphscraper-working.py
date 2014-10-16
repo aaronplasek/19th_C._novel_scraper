@@ -1,19 +1,19 @@
 #For use with python 3.x.
-#Program only checks xml files in directory that contains epigraphscraper.
-#Be sure to delete all csv files before running as program just appends to any existing csv file.
+# Program only checks xml files in directory that contains this python file.
+# Delete all csv files before running script. Script appends to csv files of 
+# the same name if they already exist.
 
 # libraries
-from bs4 import BeautifulSoup            #used to select XML tags and parse document
-from os import walk, getcwd, listdir     #used to grab all files in directory of script
+from bs4 import BeautifulSoup            # select XML tags and parse text
+from os import walk, getcwd, listdir     # grab all files in directory of script
 import os                                
-import csv                               #to interact with csv files (not yet working)
+import csv                               # interact with csv files (not yet working)
 import re                                # use regular expressions to standardize authors
-#import sys                              #take input from command line
+#import sys                              # take input from command line
 
 # variables & functions
-totalEpigraphCount = 0                   #number of epigraphs in all files in directory
-epigraphlessFileCount = 0                #number of files in directory that do not have epigraphs
-characters_to_be_removed_from_attribution = '\n'          #characters to be removed from epigraph attributions
+totalEpigraphCount = 0                   #number of epigraphs in xml files in corpus
+epigraphlessFileCount = 0                #number of xml files in corpus that do not have epigraphs
 
 def remove_characters(listofstrings, characters_to_be_removed):
     for string in range(0,len(listofstrings)):
@@ -25,42 +25,55 @@ def remove_characters(listofstrings, characters_to_be_removed):
     return listofstrings 
 
 
-# PROGRAM ---
+## COLLECTING INFORMATION FROM CORPUS 
 allFilesInDirectory = [ filename for filename in listdir(getcwd()) if filename.endswith('.xml')] #get filenames in current directory ending in ".xml"
-
-#scrape epigraphs from all XML files
-for document in range(0, len(allFilesInDirectory)):                   #for loop through all files in directory
-    root, ext = os.path.splitext(allFilesInDirectory[document])        #select file extension for particular file "x" in the list "allFilesInDirectory"
-    if (ext == '.xml'):                                         #if file ends in ".xml", read file 
+for document in range(0, len(allFilesInDirectory)):                   # Loop through all files in directory
+    root, ext = os.path.splitext(allFilesInDirectory[document])       # Select file extension for particular file "x" in the list "allFilesInDirectory"
+    if (ext == '.xml'):                                               # If file ends in ".xml", read file. Skip file otherwise. 
     # open file to be read
-        #print("TEXT " + str(document+1) + ': ' + allFilesInDirectory[document])  #error check line; uncomment to see progress in terminal
-        readfile = open(str(allFilesInDirectory[document]))	        #specify file "x" to be read & open file
-        soup = BeautifulSoup(readfile)                           #make "soup" object of file to search 
-    # collect author & epigraphs from individual file
-        author_list = [author.text for author in soup('author')]          #collect entries tagged "author" and place it in the list "authorlist"
-        title_list = [title.text for title in soup('title')]              #collect "title" tag entries
-        publication_date = [date.text for date in soup('date')]
-        publication_place = [pubplace.text for pubplace in soup('pubplace')]
-        if len(soup('epigraph')) > 0:
-            epigraph_list = [epigraph.text for epigraph in soup('epigraph')]  #collect entries tagged "epigraph" and place it in the list "epigraphlist'
+        readfile = open(str(allFilesInDirectory[document]))	          # Specify file to be read & open file
+        soup = BeautifulSoup(readfile)                                # Make "soup" object of file to search 
+    
+    # collect novel author, title of novel, pub date, epigraph, epigraph attrib, pub location, publisher, & encoding company from individual file
+        author_list = [author.text for author in soup('author')]   # collect text "author" entries
+        title_list = [title.text for title in soup('title')]       # collect text "title" entries
+        
+        publication_date = [date.text for date in soup('date')]    # collect text pub year entries
+        if "eaf" in root:                                          # select correct year depending on EAF or Wright corpus. Throw warning if not one of these two corpora.
+                pub_year = str(publication_date[1])                # pick 2nd date tag for EAF corpus
+        else:
+            if "VAC" in root:
+                pub_year = str(publication_date[0])                # pick 1st date tag for Wright corpus
+            else: 
+                pub_year = 'Unknown Corpus, see terminal warning'                  # user must check pub year entry
+                print('WARNING: Check publication year for file ' + root + ext + '\n') 
+                print('List of publication dates in file: \n')
+                print(publication_date)
+        
+        publication_place = [pubplace.text for pubplace in soup('pubplace')]  #collect text pub location
+        if len(soup('epigraph')) > 0:                                         #collect entries tagged "epigraph" and place it in the list "epigraphlist'
+            epigraph_list = [epigraph.text for epigraph in soup('epigraph')]  
             epigraph_attribution = ["No Attribution" if soup('epigraph')[epigraphs].bibl == None \
                                                  else  soup('epigraph')[epigraphs].bibl.text \
                                                  for epigraphs in range(0,len(soup('epigraph')))]
-
-            #see how many quote tags are nested in epigraph tags
-            quote_tags_in_epigraph = ["No quote tags used" if soup('epigraph')[epigraphs].quote == None \
+            #see how many quote tags are nested in epigraph tags (for error checking; see line 59)
+            quote_tags_in_epigraph = ["No quote tags" if soup('epigraph')[epigraphs].quote == None \
                                                  else soup('epigraph')[epigraphs].quote.text \
                                                  for epigraphs in range(0,len(soup('epigraph')))]
         else: 
             epigraph_list = ['No Epigraphs']
             epigraph_attribution = ['No Epigraphs']
+        if len(soup('publisher')) > 0:         
+            publishers = [publisher.text for publisher in soup('publisher')]
+        else: 
+            publishers = ['Unknown Publisher', 'Unknown Publisher','Unknown Publisher']
         
-    # Checks to identify epigraphs with 'quote' tag & tracking of who did encoding
-        total_epigraph_tags = str(len(soup('epigraph'))) # for error check
-        total_quote_tags = str(len(soup('quote')))       # for error check
-        quotes_in_epigraphs = str(len(soup('quote_tags_in_epigraph'))) #for error check   
+    # Checks to identify epigraphs with 'quote' tag & tracking of who did encoding (see also lines 47-50)
+        total_epigraph_tags = str(len(soup('epigraph')))        # number of tagged "epigraph"s in file
+        total_quote_tags = str(len(soup('quote')))              # number of tagged "quote"s in file
+        quotes_in_epigraphs = str(len(quote_tags_in_epigraph))  # number of "quote"s in "epigraph"s
 
-        # tracking down company that produced the XML file
+    # identify company that produced xml file (c.f. labor issues involving corpus creation)
         encoding_company = 'No Company Attribution Found'
         encoding_counter = 0
         if len(soup('name')) > 0 :
@@ -77,19 +90,15 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
         if (encoding_counter > 1):
             encoding_company = 'Multiple companies detected. CHECK FILE.'
 
-        if len(soup('publisher')) > 0:         
-            publishers = [publisher.text for publisher in soup('publisher')]
-        else: 
-            publishers = ['Unknown Publisher', 'Unknown Publisher','Unknown Publisher']
-
-
+    ## CLEANING INFORMATION COLLECTED FROM CORPUS
     # remove "/n" characters
-        epigraph_attribution = remove_characters(epigraph_attribution, '\n')
+        epigraph_attribution = remove_characters(epigraph_attribution, '-\n')
         author_list = remove_characters(author_list, '\n')
         title_list = remove_characters(title_list, '\n')
         publication_place = remove_characters(publication_place, '\n')
         publishers = remove_characters(publishers, '\n')
-        publication_date = remove_characters(publication_date, '\n') 
+        pub_year = remove_characters([pub_year], '\n')[0]
+        print(pub_year)
         encoding_company = str(remove_characters([encoding_company], '\n'))                                   
     
     # standardize names in author list
@@ -97,9 +106,6 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
     #reg_ex_for_year = re.compile(r'^(10|11|12|13|14|15|16|17|18|19|20)\d{2}$') #find 4-digit year b/w 1000 & 2999
 
         readfile.close() #close file "x"
-
-    #Checking for Epigraphs with different XML tags
-        #print('epigraph :: quote = ' + str(len(soup('epigraph'))) + " :: " + str(len(soup('quote'))))
 
 # Error Checking Print-To-Terminal: print all information collected
         if (len(soup('epigraph')) == 0):                         #check if file has epigraphs                
@@ -121,9 +127,9 @@ for document in range(0, len(allFilesInDirectory)):                   #for loop 
             epi_meta = csv.writer(csvfile, dialect='excel')
             for i in range(0,len(soup('epigraph'))):
                 if (len(soup('author')) ==0):
-                    epi_meta.writerow([str(i) + '|' + allFilesInDirectory[document] + '|'+ str(document) + '|' +  'Unknown Author' + '|' + str(title_list[0])+ '|' + str(epigraph_attribution[i])+ '|' + str(publishers[0]) + '|' + str(publication_place[0])+ '|' + str(publication_date[0])])           
+                    epi_meta.writerow([str(i) + '|' + allFilesInDirectory[document] + '|'+ str(document) + '|' +  'Unknown Author' + '|' + str(title_list[0])+ '|' + str(epigraph_attribution[i])+ '|' + str(publishers[1]) + '|' + str(publication_place[1])+ '|' + pub_year])           
                 else:
-                    epi_meta.writerow([str(i) + '|' + allFilesInDirectory[document] + '|'+ str(document) + '|' +  author_list[0] + '|' + str(title_list[0])+ '|' + str(epigraph_attribution[i])+ '|' +  str(publishers[0]) + '|' + str(publication_place[0])+ '|' + str(publication_date[0])])
+                    epi_meta.writerow([str(i) + '|' + allFilesInDirectory[document] + '|'+ str(document) + '|' +  author_list[0] + '|' + str(title_list[0])+ '|' + str(epigraph_attribution[i])+ '|' +  str(publishers[1]) + '|' + str(publication_place[1])+ '|' + pub_year])
 
         with open('epigraph_list.csv', 'a') as csvfile: #output metadata
             epi_list = csv.writer(csvfile, dialect='excel')
@@ -150,10 +156,10 @@ print("TOTAl NUMBER OF EPIGRAPHS: " + str(totalEpigraphCount))
 print("TOTAL NUMBER OF FILES: " + str(len(allFilesInDirectory)))
 print("FILES WITHOUT EPIGRAPHS: " + str(epigraphlessFileCount))
 
-#CODE SNIPPETS & USEFUL NOTES ----
+#SYNTAX NOTE FOR BS4  ----
 #Can directly access individual epigraph as follows:
 #soup('author')[0].text
 #soup('author')[1].text
 #etc. 
-
-#NOTE FOR BEAUTIFUL SOUP: soup('epigraph') == soup.find_all('epigraph')
+#
+#ALSO, NOTE FOR BS4: soup('epigraph') == soup.find_all('epigraph') == soup.findAll('epigraph')
