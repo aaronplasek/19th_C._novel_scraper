@@ -90,6 +90,7 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
         if (encoding_counter > 1):
             encoding_company = 'Multiple companies detected. CHECK FILE.'
 
+
     ## CLEANING INFORMATION COLLECTED FROM CORPUS
     # remove "/n" characters
         epigraph_attribution = remove_characters(epigraph_attribution, '-\n')
@@ -98,7 +99,6 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
         publication_place = remove_characters(publication_place, '\n')
         publishers = remove_characters(publishers, '\n')
         pub_year = remove_characters([pub_year], '\n')[0]
-        print(pub_year)
         encoding_company = str(remove_characters([encoding_company], '\n'))                                   
     
     # standardize names in author list
@@ -126,6 +126,8 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
         with open('epigraph_metadata.csv', 'a') as csvfile: #output metadata
             epi_meta = csv.writer(csvfile, dialect='excel')
             for i in range(0,len(soup('epigraph'))):
+                if (document == 0 and i == 0):
+                    epi_meta.writerow(['epi #' + '|' + 'file name' + '|'+ 'text #' + '|' +  'author' + '|' + 'title' + '|' + 'epi attribution'+ '|' +  'text publisher' + '|' + 'publication location' + '|' + 'pub year'])
                 if (len(soup('author')) ==0):
                     epi_meta.writerow([str(i) + '|' + allFilesInDirectory[document] + '|'+ str(document) + '|' +  'Unknown Author' + '|' + str(title_list[0])+ '|' + str(epigraph_attribution[i])+ '|' + str(publishers[1]) + '|' + str(publication_place[1])+ '|' + pub_year])           
                 else:

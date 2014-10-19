@@ -7,7 +7,7 @@
 from bs4 import BeautifulSoup            # select XML tags and parse text
 from os import walk, getcwd, listdir     # grab all files in directory of script
 import os                                
-import csv                               # interact with csv files (not yet working)
+import csv                               # interact with csv files
 import re                                # use regular expressions to standardize authors
 #import sys                              # take input from command line
 
@@ -46,7 +46,7 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
                 pub_year = str(publication_date[0])                # pick 1st date tag for Wright corpus
             else: 
                 pub_year = 'Unknown Corpus, see terminal warning'                  # user must check pub year entry
-                print('WARNING: Check publication year for file ' + root + ext + '\n') 
+                print('WARNING: Check publication year for file ' + root +'.'+ ext + '\n') 
                 print('List of publication dates in file: \n')
                 print(publication_date)
         
