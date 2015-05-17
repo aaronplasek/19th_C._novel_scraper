@@ -8,4 +8,5 @@ This script was tested on a Macbook Pro and an iMac (both using OS 10.9.x) using
 =============
 Just place the script in the directory with your XML texts to be scraped, and then run script in the terminal by typing
 `python3 xml_scraper.py`.
+
 The csv file generated will be placed in the same directory as xml_scraper.py. 
