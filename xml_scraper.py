@@ -5,13 +5,13 @@
 
 # libraries
 from bs4 import BeautifulSoup            # select XML tags and parse text
-from os import walk, getcwd, listdir     # grab all files in directory of script
-import os                                
+from os import walk, getcwd, listdir     # used to grab all files in directory of script (c.f. line 29)
+import os                                # used to split off filename root from filename extension (c.f. line 31)
 import csv                               # interact with csv files
-import re                                # use regular expressions to standardize authors
-#import sys                              # take input from command line
+#import re                               # use regular expressions to standardize authors (in future versions? This is presently done by hand.)
+#import sys                              # take input from command line (in future versions?)
 
-# variables & functions
+## GLOBAL VARIABLES & FUNCTIONS
 totalEpigraphCount = 0                   #number of epigraphs in xml files in corpus
 epigraphlessFileCount = 0                #number of xml files in corpus that do not have epigraphs
 
@@ -35,31 +35,31 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
         soup = BeautifulSoup(readfile)                                # Make "soup" object of file to search 
     
     # collect novel author, title of novel, pub date, epigraph, epigraph attrib, pub location, publisher, & encoding company from individual file
-        author_list = [author.text for author in soup('author')]   # collect text "author" entries
-        title_list = [title.text for title in soup('title')]       # collect text "title" entries
+        author_list = [author.text for author in soup('author')]   # (1) collect text "author" entries
+        title_list = [title.text for title in soup('title')]       # (2) collect text "title" entries
         
-        publication_date = [date.text for date in soup('date')]    # collect text pub year entries
-        if "eaf" in root:                                          # select correct year depending on EAF or Wright corpus. Throw warning if not one of these two corpora.
-                pub_year = str(publication_date[1])                # pick 2nd date tag for EAF corpus
+        publication_date = [date.text for date in soup('date')]    # (3) collect text pub year entries
+        if "eaf" in root:                                          ### select correct year depending on EAF or Wright corpus. Throw warning if not one of these two corpora.
+                pub_year = str(publication_date[1])                ### pick 2nd date tag for EAF corpus
         else:
             if "VAC" in root:
-                pub_year = str(publication_date[0])                # pick 1st date tag for Wright corpus
+                pub_year = str(publication_date[0])                ### pick 1st date tag for Wright corpus
             else: 
-                pub_year = 'Unknown Corpus, see terminal warning'                  # user must check pub year entry
+                pub_year = 'Unknown Corpus, see terminal warning'  ### WARNING: user must check pub year entry
                 print('WARNING: Check publication year for file ' + root +'.'+ ext + '\n') 
                 print('List of publication dates in file: \n')
                 print(publication_date)
         
-        publication_place = [pubplace.text for pubplace in soup('pubplace')]  #collect text pub location
-        if len(soup('epigraph')) > 0:                                         #collect entries tagged "epigraph" and place it in the list "epigraphlist'
+        publication_place = [pubplace.text for pubplace in soup('pubplace')]  #(4) collect text pub location
+        if len(soup('epigraph')) > 0:                                         #(5) collect entries tagged "epigraph"
             epigraph_list = [epigraph.text for epigraph in soup('epigraph')]  
             epigraph_attribution = ["No Attribution" if soup('epigraph')[epigraphs].bibl == None \
                                                  else  soup('epigraph')[epigraphs].bibl.text \
-                                                 for epigraphs in range(0,len(soup('epigraph')))]
-            #see how many quote tags are nested in epigraph tags (for error checking; see line 59)
+                                                 for epigraphs in range(0,len(soup('epigraph')))] #(6) collect epigraph attributions
+            #see how many quote tags are nested in epigraph tags (for error checking; c.f. line 71-74)
             quote_tags_in_epigraph = ["No quote tags" if soup('epigraph')[epigraphs].quote == None \
                                                  else soup('epigraph')[epigraphs].quote.text \
-                                                 for epigraphs in range(0,len(soup('epigraph')))]
+                                                 for epigraphs in range(0,len(soup('epigraph')))] # how often is quote tag appearing in epigraph tag? (used to help hunt for untagged epigraphs in corpus)
         else: 
             epigraph_list = ['No Epigraphs']
             epigraph_attribution = ['No Epigraphs']
@@ -73,22 +73,40 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
         total_quote_tags = str(len(soup('quote')))              # number of tagged "quote"s in file
         quotes_in_epigraphs = str(len(quote_tags_in_epigraph))  # number of "quote"s in "epigraph"s
 
-    # identify company that produced xml file (c.f. labor issues involving corpus creation)
-        encoding_company = 'No Company Attribution Found'
+    # identify company/individuals that produced xml file (for exploring provenance of corpus)
+        encoders = []
         encoding_counter = 0
-        if len(soup('name')) > 0 :
-            encoding_company = str(soup('name')[0].text)
-        if soup(text='Apex Data Services'):
-            encoding_company = 'Apex Data Services'
-            encoding_counter = encoding_counter+1
-        if soup(text='Digital Library Program'):
-            encoding_company = ' AEL Data, Pacific Data Conversion Corp (now SPI Content Sciences), OR Techbooks. see http://webapp1.dlib.indiana.edu/TEIgeneral/projectinfo/encoding.do'
-            encoding_counter = encoding_counter+1
-        if soup(text='ACR'):
-            encoding_company = 'ACR'
-            encoding_counter = encoding_counter+1
-        if (encoding_counter > 1):
-            encoding_company = 'Multiple companies detected. CHECK FILE.'
+
+        ## for Early American Fiction corpus ...
+        if root[:3] == 'eaf': #Not ideal way to handle this, but will throw error if no encoder found...
+            if soup(text='Apex Data Services'):
+                encoders.append('Apex Data Services')  
+            #if soup(text='Digital Library Program'):
+            #    encoding_company = ' AEL Data, Pacific Data Conversion Corp (now SPI Content Sciences), OR Techbooks. see http://webapp1.dlib.indiana.edu/TEIgeneral/projectinfo/encoding.do'
+            if soup(text='ACR'):
+                encoders.append('ACR')
+            if len(encoders) == 0:
+                print('WARNING: no encoder info found for ' + root + ". Check file.")  
+            
+        
+        ## for Wright American Fiction corpus ...
+        if root[:3] == 'VAC':            # Wright American Fiction corpus files begin with "VAC" 
+            encoders = [soup('change')[encoder].get('who') for encoder in range(0,len(soup('change')))] #get encoders from 'who' attrs in 'change' tags
+            
+            ### remove duplicate encoders, if present
+            duplicate_list = []
+            for x in range(len(encoders)): #find duplicates and place in 'duplicate_list'
+                    if x != 0:
+                        if (encoders[0] == encoders[x]):
+                            duplicate_list.append(x)
+            for deletions in range(len(duplicate_list)): # mark duplicates by replacing element with 'To Erase'
+                encoders[duplicate_list[deletions]] = "To Erase"
+            for deletions in range(len(encoders)-1,0,-1): # delete duplicate entries
+                if encoders[deletions] == "To Erase":
+                    del encoders[deletions]
+
+        if len(encoders) == 0:
+            print('WARNING: no encoder info found for ' + root + ". Check file.")        
 
     ## CLEANING INFORMATION COLLECTED FROM CORPUS
     # remove "/n" characters
@@ -98,11 +116,10 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
         publication_place = remove_characters(publication_place, '\n')
         publishers = remove_characters(publishers, '\n')
         pub_year = remove_characters([pub_year], '\n')[0]
-        encoding_company = str(remove_characters([encoding_company], '\n'))                                   
+        encoders = str(remove_characters(encoders, '\n'))                                  
     
     # standardize names in author list
     # generate a dict for first and last names based on corpus entries for XML texts
-    #reg_ex_for_year = re.compile(r'^(10|11|12|13|14|15|16|17|18|19|20)\d{2}$') #find 4-digit year b/w 1000 & 2999
 
         readfile.close() #close file "x"
 
@@ -148,14 +165,15 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
             else:
                 author_error_check = str(len(soup('author')))
 
-            epi_to_quote.writerow([str(document) + '|' + str(allFilesInDirectory[document]) + '|' +  encoding_company + '|' + total_epigraph_tags + '|' + total_quote_tags + '|' + quotes_in_epigraphs])
-        
+            epi_to_quote.writerow([str(document) + '|' + str(allFilesInDirectory[document]) + '|' +  encoders + '|' + total_epigraph_tags + '|' + total_quote_tags + '|' + quotes_in_epigraphs])
+       
 #Error Checking Print-To-Terminal: Print total number of epigraphs collected  
 print("TOTAl NUMBER OF EPIGRAPHS: " + str(totalEpigraphCount))
 print("TOTAL NUMBER OF FILES: " + str(len(allFilesInDirectory)))
 print("FILES WITHOUT EPIGRAPHS: " + str(epigraphlessFileCount))
 
-#SYNTAX NOTE FOR BS4  ----
+
+#SYNTAX NOTE FOR BeautifulSoup4  ----
 #Can directly access individual epigraph as follows:
 #soup('author')[0].text
 #soup('author')[1].text
