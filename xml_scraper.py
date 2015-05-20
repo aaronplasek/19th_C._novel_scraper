@@ -78,22 +78,18 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
         encoding_counter = 0
 
         ## for Early American Fiction corpus ...
-        if root[:3] == 'eaf': #Not ideal way to handle this, but will throw error if no encoder found...
-            if soup(text='Apex Data Services'):
-                encoders.append('Apex Data Services')  
-            #if soup(text='Digital Library Program'):
-            #    encoding_company = ' AEL Data, Pacific Data Conversion Corp (now SPI Content Sciences), OR Techbooks. see http://webapp1.dlib.indiana.edu/TEIgeneral/projectinfo/encoding.do'
-            if soup(text='ACR'):
-                encoders.append('ACR')
-            if len(encoders) == 0:
-                print('WARNING: no encoder info found for ' + root + ". Check file.")  
+        if root[:3] == 'eaf': #Not ideal way to handle this, but encoder always 1st 'name' tag in EAF files
+            encoders.append(soup('name')[0].text)
+            encoding_counter = 1
+            print(encoders)
             
         
         ## for Wright American Fiction corpus ...
         if root[:3] == 'VAC':            # Wright American Fiction corpus files begin with "VAC" 
             encoders = [soup('change')[encoder].get('who') for encoder in range(0,len(soup('change')))] #get encoders from 'who' attrs in 'change' tags
-            
-            ### remove duplicate encoders, if present
+            encoding_counter = 1
+
+            ### remove duplicate encoders entries, if present
             duplicate_list = []
             for x in range(len(encoders)): #find duplicates and place in 'duplicate_list'
                     if x != 0:
@@ -105,8 +101,11 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
                 if encoders[deletions] == "To Erase":
                     del encoders[deletions]
 
+        if encoding_counter == 0:
+            print('WARNING: No case selected for encoder attribution for ' + root + '. Check file.')
+
         if len(encoders) == 0:
-            print('WARNING: no encoder info found for ' + root + ". Check file.")        
+            print('WARNING: no encoder info found for ' + root + '. Check file.')        
 
     ## CLEANING INFORMATION COLLECTED FROM CORPUS
     # remove "/n" characters
