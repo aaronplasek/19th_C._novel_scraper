@@ -62,7 +62,7 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
             #print("epigraph: " + str(bool(soup('epigraph'))))
             #print("quote: " + str(bool(soup('quote'))))
 
-            if bool(soup('epigraph')) & bool(soup('quote')) == True :  # don't check if there are zero "epipgraph" and/or "quote" tags
+            if bool(soup('epigraph')) and bool(soup('quote')) == True :  # don't check if there are zero "epipgraph" and/or "quote" tags
                 quote_tags_in_epigraph = [0 if soup('epigraph')[epigraphs].quote == None \
                                          else 1 for epigraphs in range(0,len(soup('epigraph')))] # how often is quote tag appearing in epigraph tag? (used to help hunt for untagged epigraphs in corpus)
             else:
@@ -109,15 +109,15 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
             print('WARNING: no encoder info found for ' + root + '. Check file.')  
 
     # (8) identify epigraphs with 'quote' tag & tracking of who did encoding (see also lines 47-50)  
-        total_epigraph_tags = str(len(soup('epigraph')))        # number of tagged "epigraph"s in file
-        total_quote_tags = str(len(soup('quote')))              # number of tagged "quote"s in file
+        total_epigraph_tags = len(soup('epigraph'))        # number of tagged "epigraph"s in file
+        total_quote_tags = len(soup('quote'))              # number of tagged "quote"s in file
         #print(root)
         #print("epigraph: " + str(len(soup('epigraph'))) + "  " + str(bool(soup('epigraph'))))
         if bool(soup('epigraph')) == True:
         #print(quote_tags_in_epigraph)
-            quotes_in_epigraphs = str(sum(quote_tags_in_epigraph))  # number of "quote"s in "epigraph"s  
+            quotes_in_epigraphs = sum(quote_tags_in_epigraph)  # number of "quote"s in "epigraph"s  
         else:
-            quotes_in_epigraphs = "0"    
+            quotes_in_epigraphs = 0    
 
     ## CLEANING INFORMATION COLLECTED FROM CORPUS
     # remove "/n" characters
@@ -154,9 +154,9 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
             epi_meta = csv.writer(csvfile, dialect='excel')
             for i in range(0,len(soup('epigraph'))):
                 if (len(soup('author')) ==0):
-                    epi_meta.writerow([str(i) + '|' + allFilesInDirectory[document] + '|'+ str(document) + '|' +  'Unknown Author' + '|' + str(title_list[0])+ '|' + str(epigraph_attribution[i])+ '|' + str(publishers[1]) + '|' + str(publication_place[1])+ '|' + pub_year])           
+                    epi_meta.writerow(['junkrow |' + str(i) + '|' + allFilesInDirectory[document] + '|'+ str(document) + '|' +  'Unknown Author' + '|' + str(title_list[0])+ '|' + str(epigraph_attribution[i])+ '|' + str(publishers[1]) + '|' + str(publication_place[1])+ '|' + pub_year + '| junkrow'])           
                 else:
-                    epi_meta.writerow([str(i) + '|' + allFilesInDirectory[document] + '|'+ str(document) + '|' +  author_list[0] + '|' + str(title_list[0])+ '|' + str(epigraph_attribution[i])+ '|' +  str(publishers[1]) + '|' + str(publication_place[1])+ '|' + pub_year])
+                    epi_meta.writerow(['junkrow |' + str(i) + '|' + allFilesInDirectory[document] + '|'+ str(document) + '|' +  author_list[0] + '|' + str(title_list[0])+ '|' + str(epigraph_attribution[i])+ '|' +  str(publishers[1]) + '|' + str(publication_place[1])+ '|' + pub_year + '| junkrow'])
 
         with open('epigraph_list.csv', 'a') as csvfile: #output metadata
             epi_list = csv.writer(csvfile, dialect='excel')
@@ -168,15 +168,21 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
         with open('epigraph_to_quotes.csv', 'a') as csvfile: 
             epi_to_quote = csv.writer(csvfile, dialect='excel')
             if (document == 0):
-                epi_to_quote.writerow(['file number' + '|' + 'file name' + '|' + 'encoding credit' + '|' + 'total epigraph tags' + '|' + 'total quote tags' + '|' + 'quote pairs in epigraphs' ])
+                epi_to_quote.writerow(['junkrow | file number | check? | file name | encoding credit | total epigraph tags | total quote tags | quote pairs in epigraphs | junkrow'])
             
             author_error_check = 'Field Empty -- ERROR'
             if len(soup('author')) == 0:
                 author_error_check = 'No Author Tags!'
             else:
                 author_error_check = str(len(soup('author')))
+            
+            checkFile = 'yes'  #indicator to inspect novel pdf
+            if int(total_epigraph_tags) >= int(total_quote_tags) \
+               and int(quotes_in_epigraphs) == int(total_epigraph_tags) \
+               or int(total_epigraph_tags) > 0 and int(total_quote_tags) == 0:
+               checkFile = 'no'
 
-            epi_to_quote.writerow([str(document) + '|' + str(allFilesInDirectory[document]) + '|' +  encoders + '|' + total_epigraph_tags + '|' + total_quote_tags + '|' + quotes_in_epigraphs])
+            epi_to_quote.writerow(['junkrow |' + str(document) + '|' + checkFile + '|'+ str(allFilesInDirectory[document]) + '|' +  encoders + '|' + str(total_epigraph_tags) + '|' + str(total_quote_tags) + '|' + str(quotes_in_epigraphs) + '| junkrow'])
        
 #Error Checking Print-To-Terminal: Print total number of epigraphs collected  
 print("TOTAl NUMBER OF EPIGRAPHS: " + str(totalEpigraphCount))
