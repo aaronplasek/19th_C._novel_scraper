@@ -56,12 +56,21 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
             epigraph_attribution = ["No Attribution" if soup('epigraph')[epigraphs].bibl == None \
                                                  else  soup('epigraph')[epigraphs].bibl.text \
                                                  for epigraphs in range(0,len(soup('epigraph')))] #(6) collect epigraph attributions
-            #see how many quote tags are nested in epigraph tags (for error checking; c.f. line 102)
-            quote_tags_in_epigraph = [0 if soup('epigraph')[epigraphs].quote == None \
-                                                 else 1 for epigraphs in range(0,len(soup('epigraph')))] # how often is quote tag appearing in epigraph tag? (used to help hunt for untagged epigraphs in corpus)
+            
+            ##see how many quote tags are nested in epigraph tags (for error checking; c.f. line 102)
+            #print('bool check for ' + root)
+            #print("epigraph: " + str(bool(soup('epigraph'))))
+            #print("quote: " + str(bool(soup('quote'))))
+
+            if bool(soup('epigraph')) & bool(soup('quote')) == True :  # don't check if there are zero "epipgraph" and/or "quote" tags
+                quote_tags_in_epigraph = [0 if soup('epigraph')[epigraphs].quote == None \
+                                         else 1 for epigraphs in range(0,len(soup('epigraph')))] # how often is quote tag appearing in epigraph tag? (used to help hunt for untagged epigraphs in corpus)
+            else:
+                quote_tags_in_epigraph = [0] # either no "quote" or "epigraph" tags or neither, so no quote-in-epigraph tags                             
         else: 
             epigraph_list = ['No Epigraphs']
             epigraph_attribution = ['No Epigraphs']
+
         if len(soup('publisher')) > 0:         
             publishers = [publisher.text for publisher in soup('publisher')]
         else: 
@@ -102,7 +111,13 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
     # (8) identify epigraphs with 'quote' tag & tracking of who did encoding (see also lines 47-50)  
         total_epigraph_tags = str(len(soup('epigraph')))        # number of tagged "epigraph"s in file
         total_quote_tags = str(len(soup('quote')))              # number of tagged "quote"s in file
-        quotes_in_epigraphs =   # number of "quote"s in "epigraph"s      
+        #print(root)
+        #print("epigraph: " + str(len(soup('epigraph'))) + "  " + str(bool(soup('epigraph'))))
+        if bool(soup('epigraph')) == True:
+        #print(quote_tags_in_epigraph)
+            quotes_in_epigraphs = str(sum(quote_tags_in_epigraph))  # number of "quote"s in "epigraph"s  
+        else:
+            quotes_in_epigraphs = "0"    
 
     ## CLEANING INFORMATION COLLECTED FROM CORPUS
     # remove "/n" characters
