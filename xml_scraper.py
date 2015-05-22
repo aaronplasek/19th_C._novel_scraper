@@ -57,11 +57,7 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
                                                  else  soup('epigraph')[epigraphs].bibl.text \
                                                  for epigraphs in range(0,len(soup('epigraph')))] #(6) collect epigraph attributions
             
-            ##see how many quote tags are nested in epigraph tags (for error checking; c.f. line 102)
-            #print('bool check for ' + root)
-            #print("epigraph: " + str(bool(soup('epigraph'))))
-            #print("quote: " + str(bool(soup('quote'))))
-
+            ##see how many quote tags are nested in epigraph tags (for error checking; c.f. line 111)
             if bool(soup('epigraph')) and bool(soup('quote')) == True :  # don't check if there are zero "epipgraph" and/or "quote" tags
                 quote_tags_in_epigraph = [0 if soup('epigraph')[epigraphs].quote == None \
                                          else 1 for epigraphs in range(0,len(soup('epigraph')))] # how often is quote tag appearing in epigraph tag? (used to help hunt for untagged epigraphs in corpus)
@@ -111,8 +107,6 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
     # (8) identify epigraphs with 'quote' tag & tracking of who did encoding (see also lines 47-50)  
         total_epigraph_tags = len(soup('epigraph'))        # number of tagged "epigraph"s in file
         total_quote_tags = len(soup('quote'))              # number of tagged "quote"s in file
-        #print(root)
-        #print("epigraph: " + str(len(soup('epigraph'))) + "  " + str(bool(soup('epigraph'))))
         if bool(soup('epigraph')) == True:
         #print(quote_tags_in_epigraph)
             quotes_in_epigraphs = sum(quote_tags_in_epigraph)  # number of "quote"s in "epigraph"s  
@@ -128,9 +122,6 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
         publishers = remove_characters(publishers, '\n')
         pub_year = remove_characters([pub_year], '\n')[0]
         encoders = str(remove_characters(encoders, '\n'))                                  
-    
-    # standardize names in author list (Will do this manually for corpus...)
-    # generate a dict for first and last names based on corpus entries for XML texts (Will do this manually for corpus...)
 
         readfile.close() #close file "x"
 
@@ -189,11 +180,4 @@ print("TOTAl NUMBER OF EPIGRAPHS: " + str(totalEpigraphCount))
 print("TOTAL NUMBER OF FILES: " + str(len(allFilesInDirectory)))
 print("FILES WITHOUT EPIGRAPHS: " + str(epigraphlessFileCount))
 
-
-#SYNTAX NOTE FOR BeautifulSoup4  ----
-#Can directly access individual epigraph as follows:
-#soup('author')[0].text
-#soup('author')[1].text
-#etc. 
-#
-#ALSO, NOTE FOR BS4: soup('epigraph') == soup.find_all('epigraph') == soup.findAll('epigraph')
+#NOTE FOR BS4: soup('epigraph') == soup.find_all('epigraph') == soup.findAll('epigraph')
