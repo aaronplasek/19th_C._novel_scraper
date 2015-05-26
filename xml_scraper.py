@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup            # select XML tags and parse text
 from os import walk, getcwd, listdir     # used to grab all files in directory of script (c.f. line 29)
 import os                                # used to split off filename root from filename extension (c.f. line 31)
 import csv                               # interact with csv files
-#import re                               # use regular expressions to standardize authors (in future versions? This is presently done by hand.)
+import re                                # use regular expressions (for parsing author birth/death dates from author names)
 #import sys                              # take input from command line (in future versions?)
 
 ## GLOBAL VARIABLES & FUNCTIONS
@@ -35,7 +35,46 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
         soup = BeautifulSoup(readfile)                                # Make "soup" object of file to search 
     
     # collect novel author, title of novel, pub date, epigraph, epigraph attrib, pub location, publisher, & encoding company from individual file
-        author_list = [author.text for author in soup('author')]   # (1) collect text "author" entries
+        author_list = [author.text for author in soup('author')]   # (1) collect text "author" entries (&, if present, birth/death year)
+        
+        # identify author birth & death years by scraping from author name, clean up author name entry
+        birthDeathYears = []                                          # years extracted from author_list will be placed here
+        authorBirthYear = 'No Birth Year'                             # Birth year OR Year if only a single year is provided                  
+        authorDeathYear = 'No Death Year'                             # Death year
+        birthDeathYears = re.findall('\d{4}', author_list[0])         # scrape years from author name entry if present
+        birthDeathYears = [int(string) for string in birthDeathYears] # convert years from strings to integers 
+        if len(birthDeathYears) >= 3:                                 # does file have three or more years in author line?
+            print('WARNING: ' + str(len(BirthDeathYears)) + ' years in author line in ' + root)
+            authorBirthYear = 'Too many years'                        # too many years, not sure which is birth or death
+            authorDeathYear = 'Too many years'
+        elif len(birthDeathYears) == 2:                        # or two years?  
+            authorBirthYear = str(min(birthDeathYears[0],birthDeathYears[1])) # birth year
+            authorDeathYear = str(max(birthDeathYears[0],birthDeathYears[1])) # death year
+        elif len(birthDeathYears) == 1:
+            authorBirthYear = str(birthDeathYears[0])          # dump single year into birth year
+            authorDeathYear = '????'                                  # remind ourselves that we don't know if this year is birth or death with '????'
+        
+        # find, extract, and remove birth/death year in parentheses from author name
+        inParensToRemove = re.findall(r'\((.+)\)', author_list[0])
+        if inParensToRemove:
+            toRemove = ' ('+ inParensToRemove[0] + ')'
+            author_list[0] = author_list[0].replace(toRemove,"")
+        
+        # find, extract, and remove birth/death year from author name if no parentheses exist
+        noParensToRemove = re.findall('\d{4}-\d{4}', author_list[0])  
+        if noParensToRemove:
+            toRemove = noParensToRemove[0]
+            author_list[0] = author_list[0].replace(toRemove,"")
+        
+        #remove trailing commas or white space in author name if these symbols are present, starting from *last* symbol in author name
+        errorcounter = 0
+        while author_list[0][-1:] == ' ' or author_list[0][-1:] == ',' or author_list[0][-1:] == '\n':
+            errorcounter = errorcounter + 1
+            if errorcounter > 8:
+                print('ERROR: ' + root + 'author name cleaning stalled. Check file.')
+                break
+            author_list[0] = author_list[0][:-1]
+
         title_list = [title.text for title in soup('title')]       # (2) collect text "title" entries
         
         publication_date = [date.text for date in soup('date')]    # (3) collect text pub year entries
@@ -145,9 +184,9 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
             epi_meta = csv.writer(csvfile, dialect='excel')
             for i in range(0,len(soup('epigraph'))):
                 if (len(soup('author')) ==0):
-                    epi_meta.writerow(['junkrow |' + str(i) + '|' + allFilesInDirectory[document] + '|'+ str(document) + '|' +  'Unknown Author' + '|' + str(title_list[0])+ '|' + str(epigraph_attribution[i])+ '|' + str(publishers[1]) + '|' + str(publication_place[1])+ '|' + pub_year + '| junkrow'])           
+                    epi_meta.writerow(['junkrow |' + str(i) + '|' + allFilesInDirectory[document] + '|'+ str(document) + '|' +  'Unknown Author' + '|' + authorBirthYear + '|' + authorDeathYear + '|' + str(title_list[0])+ '|' + str(epigraph_attribution[i])+ '|' + str(publishers[1]) + '|' + str(publication_place[1])+ '|' + pub_year + '| junkrow'])           
                 else:
-                    epi_meta.writerow(['junkrow |' + str(i) + '|' + allFilesInDirectory[document] + '|'+ str(document) + '|' +  author_list[0] + '|' + str(title_list[0])+ '|' + str(epigraph_attribution[i])+ '|' +  str(publishers[1]) + '|' + str(publication_place[1])+ '|' + pub_year + '| junkrow'])
+                    epi_meta.writerow(['junkrow |' + str(i) + '|' + allFilesInDirectory[document] + '|'+ str(document) + '|' +  author_list[0] + '|' + authorBirthYear + '|' + authorDeathYear + '|' +  str(title_list[0])+ '|' + str(epigraph_attribution[i])+ '|' +  str(publishers[1]) + '|' + str(publication_place[1])+ '|' + pub_year + '| junkrow'])
 
         with open('epigraph_list.csv', 'a') as csvfile: #output metadata
             epi_list = csv.writer(csvfile, dialect='excel')
