@@ -6,6 +6,7 @@
 # libraries
 from bs4 import BeautifulSoup            # select XML tags and parse text
 from os import walk, getcwd, listdir     # used to grab all files in directory of script (c.f. line 29)
+from lxml import etree                   # using xpath to compare <quote> and <epigraph> tags in order to identify files that may have epigraphs but have not been properly tagged to indicate this
 import os                                # used to split off filename root from filename extension (c.f. line 31)
 import csv                               # interact with csv files
 import re                                # use regular expressions (for parsing author birth/death dates from author names)
@@ -15,6 +16,18 @@ import re                                # use regular expressions (for parsing 
 totalEpigraphCount = 0                   #number of epigraphs in xml files in corpus
 epigraphlessFileCount = 0                #number of xml files in corpus that do not have epigraphs
 
+def count_tags(path, tag):
+    with open(path) as xml:
+        xml_parsed = etree.parse(xml)
+    epigraph_location = xml_parsed.xpath("//tei:" + tag, namespaces = {"tei" : "http://www.tei-c.org/ns/1.0"})
+    return len(epigraph_location) 
+
+def count_nested_tags(path, child_tag, ancestor_tag):
+    with open(path) as xml:
+        xml_parsed = etree.parse(xml)
+    child_in_ancestor = xml_parsed.xpath("//tei:" + child_tag + "/ancestor::tei:" + ancestor_tag, namespaces = {"tei" : "http://www.tei-c.org/ns/1.0"})
+    return len(child_in_ancestor)
+    
 def remove_characters(listofstrings, characters_to_be_removed):
     for string in range(0,len(listofstrings)):
         cleaned_text = ""
@@ -32,7 +45,7 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
     if (ext == '.xml'):                                               # If file ends in ".xml", read file. Skip file otherwise. 
     # open file to be read
         readfile = open(str(allFilesInDirectory[document]))	          # Specify file to be read & open file
-        soup = BeautifulSoup(readfile, "xml")                                # Make "soup" object of file to search 
+        soup = BeautifulSoup(readfile, "lxml")                        # Make "soup" object of file to search 
     
     # collect novel author, title of novel, pub date, epigraph, epigraph attrib, pub location, publisher, & encoding company from individual file
         author_list = [author.text for author in soup('author')]   # (1) collect text "author" entries (&, if present, birth/death year)
@@ -47,11 +60,11 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
             print('WARNING: ' + str(len(BirthDeathYears)) + ' years in author line in ' + root)
             authorBirthYear = 'Too many years'                        # too many years, not sure which is birth or death
             authorDeathYear = 'Too many years'
-        elif len(birthDeathYears) == 2:                        # or two years?  
+        elif len(birthDeathYears) == 2:                               # or two years?  
             authorBirthYear = str(min(birthDeathYears[0],birthDeathYears[1])) # birth year
             authorDeathYear = str(max(birthDeathYears[0],birthDeathYears[1])) # death year
         elif len(birthDeathYears) == 1:
-            authorBirthYear = str(birthDeathYears[0])          # dump single year into birth year
+            authorBirthYear = str(birthDeathYears[0])                 # dump single year into birth year
             authorDeathYear = '????'                                  # remind ourselves that we don't know if this year is birth or death with '????'
         
         # find, extract, and remove birth/death year in parentheses from author name
@@ -184,14 +197,14 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
             epi_meta = csv.writer(csvfile, dialect='excel')
             for i in range(0,len(soup('epigraph'))):
                 if (len(soup('author')) ==0):
-                    epi_meta.writerow(['junkrow |' + str(i) + '|' + allFilesInDirectory[document] + '|'+ str(document) + '|' +  'Unknown Author' + '|' + authorBirthYear + '|' + authorDeathYear + '|' + str(title_list[0])+ '|' + str(epigraph_attribution[i])+ '|' + str(publishers[1]) + '|' + str(publication_place[1])+ '|' + pub_year + '| junkrow'])           
+                    epi_meta.writerow(['junkrow | ' + str(i) + ' | ' + allFilesInDirectory[document] + ' | '+ str(document) + ' | ' +  'Unknown Author' + ' | ' + authorBirthYear + ' | ' + authorDeathYear + ' | ' + str(title_list[0])+ ' | ' + str(epigraph_attribution[i])+ ' | ' + str(publishers[1]) + ' | ' + str(publication_place[1])+ ' | ' + pub_year + ' | junkrow'])           
                 else:
-                    epi_meta.writerow(['junkrow |' + str(i) + '|' + allFilesInDirectory[document] + '|'+ str(document) + '|' +  author_list[0] + '|' + authorBirthYear + '|' + authorDeathYear + '|' +  str(title_list[0])+ '|' + str(epigraph_attribution[i])+ '|' +  str(publishers[1]) + '|' + str(publication_place[1])+ '|' + pub_year + '| junkrow'])
+                    epi_meta.writerow(['junkrow | ' + str(i) + ' | ' + allFilesInDirectory[document] + ' | '+ str(document) + ' | ' +  author_list[0] + ' | ' + authorBirthYear + ' | ' + authorDeathYear + ' | ' +  str(title_list[0])+ ' | ' + str(epigraph_attribution[i])+ ' | ' +  str(publishers[1]) + ' | ' + str(publication_place[1])+ ' | ' + pub_year + ' | junkrow'])
 
         with open('epigraph_list.csv', 'a') as csvfile: #output metadata
             epi_list = csv.writer(csvfile, dialect='excel')
             for i in range(0,len(soup('epigraph'))):
-                epi_list.writerow(['Text ' + str(document+1)+ ', epigraph ' + str(i+1)]) 
+                epi_list.writerow([allFilesInDirectory[document] + " | " + str(document+1)+ ', epigraph ' + str(i+1)]) 
                 epi_list.writerow([epigraph_list[i]])           
 
         #output ratio of epigraphs-to-quotes for each file, warnings, & error checks
@@ -206,17 +219,21 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
             else:
                 author_error_check = str(len(soup('author')))
             
-            checkFile = 'yes'  #indicator to inspect novel pdf
-            if int(total_epigraph_tags) >= int(total_quote_tags) \
-               and int(quotes_in_epigraphs) == int(total_epigraph_tags) \
-               or int(total_epigraph_tags) > 0 and int(total_quote_tags) == 0:
+            checkFile = 'yes'   #indicator to inspect novel page image
+            checkFile_count = 0 #how many texts do we need to inspect with our eyes
+            if count_tags(allFilesInDirectory[document], "epigraph") >= count_nested_tags(allFilesInDirectory[document], "quote", "epigraph") \
+               and  count_tags(allFilesInDirectory[document], "epigraph") >= count_tags(allFilesInDirectory[document], "quote") \
+               or count_tags(allFilesInDirectory[document], "epigraph") >= 0 and count_tags(allFilesInDirectory[document], "quote") == 0:
                checkFile = 'no'
+            else:
+               checkFile_count += 1
 
-            epi_to_quote.writerow(['junkrow |' + str(document) + '|' + checkFile + '|'+ str(allFilesInDirectory[document]) + '|' +  encoders + '|' + str(total_epigraph_tags) + '|' + str(total_quote_tags) + '|' + str(quotes_in_epigraphs) + '| junkrow'])
+            epi_to_quote.writerow(['junkrow | ' + str(document) + ' | ' + checkFile + ' | '+ str(allFilesInDirectory[document]) + ' | ' +  encoders + ' | ' + str(total_epigraph_tags) + ' | ' + str(total_quote_tags) + ' | ' + str(quotes_in_epigraphs) + ' | junkrow'])
        
 #Error Checking Print-To-Terminal: Print total number of epigraphs collected  
 print("TOTAl NUMBER OF EPIGRAPHS: " + str(totalEpigraphCount))
 print("TOTAL NUMBER OF FILES: " + str(len(allFilesInDirectory)))
 print("FILES WITHOUT EPIGRAPHS: " + str(epigraphlessFileCount))
+print("TOTAL NUMBER OF FILES TO INSPECT: " + str(checkFile_count))
 
 #NOTE FOR BS4: soup('epigraph') == soup.find_all('epigraph') == soup.findAll('epigraph')
