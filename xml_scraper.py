@@ -32,7 +32,7 @@ for document in range(0, len(allFilesInDirectory)):                   # Loop thr
     if (ext == '.xml'):                                               # If file ends in ".xml", read file. Skip file otherwise. 
     # open file to be read
         readfile = open(str(allFilesInDirectory[document]))	          # Specify file to be read & open file
-        soup = BeautifulSoup(readfile)                                # Make "soup" object of file to search 
+        soup = BeautifulSoup(readfile, "xml")                                # Make "soup" object of file to search 
     
     # collect novel author, title of novel, pub date, epigraph, epigraph attrib, pub location, publisher, & encoding company from individual file
         author_list = [author.text for author in soup('author')]   # (1) collect text "author" entries (&, if present, birth/death year)
