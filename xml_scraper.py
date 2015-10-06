@@ -1,5 +1,5 @@
 #For use with python 3.x.
-# Program only checks xml files in directory that contains this python file.
+# Program only checks xml files in the directory that contains this python file.
 # Delete all csv files before running script. Script appends to csv files of 
 # the same name if they already exist.
 
