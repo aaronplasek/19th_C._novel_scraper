@@ -1,4 +1,4 @@
-*TEI/XML Scraper*
+*TEI/XML Epigraph Scraper*
 ================
 This script pulls XML-tagged text and metadata from all the XML files in a directory and outputs this information into a csv file (to be viewed in Excel, OpenOffice, or your preferred spreedsheet of choice). Presently the script grabs (1) author name, (2) novel title, (3) publication date, (4) publication location, (5) epigraph text, (6) epigraph attribution, (7) author birth and death years, and (8) file creation attribution from XML files in Early American Fiction and [Wright American Fiction](https://github.com/iulibdcs/tei_text) collections. 
 
