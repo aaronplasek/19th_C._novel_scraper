@@ -5,7 +5,7 @@
 
 # libraries
 from bs4 import BeautifulSoup            # select XML tags and parse text
-from os import walk, getcwd, listdir     # used to grab all files in directory of script (c.f. line 29)
+from os import walk, getcwd, listdir     # used to grab all files in directory of script
 from lxml import etree                   # using xpath to compare <quote> and <epigraph> tags in order to identify files that may have epigraphs but have not been properly tagged to indicate this
 import os                                # used to split off filename root from filename extension (c.f. line 31)
 import csv                               # interact with csv files
